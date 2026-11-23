@@ -1,0 +1,8 @@
+# Example signing properties template for AudiFi
+# Copy this file to `android/key.properties` and replace with your actual keystore credentials.
+# `key.properties` and `*.jks` are strictly excluded from git tracking via .gitignore.
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=upload
+storeFile=upload-keystore.jks
