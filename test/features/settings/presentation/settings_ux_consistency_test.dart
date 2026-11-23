@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -58,7 +59,7 @@ void main() {
       expect(find.text('Audio'), findsOneWidget);
       expect(find.text('Music'), findsOneWidget);
       expect(find.text('Appearance'), findsOneWidget);
-      expect(find.text('Privacy'), findsOneWidget);
+      expect(find.text('Privacy Policy'), findsOneWidget);
       expect(find.text('About'), findsOneWidget);
     });
 
@@ -137,25 +138,52 @@ void main() {
     );
 
     testWidgets(
-      'PrivacyView renders data isolation principles and zero tracking',
+      'PrivacyView renders data isolation principles, zero tracking, and online policy action',
       (tester) async {
         await tester.pumpWidget(createTestHarness(const PrivacyView()));
         await tester.pumpAndSettle();
 
         expect(find.text('‹ Settings'), findsOneWidget);
-        expect(find.text('Privacy'), findsOneWidget);
+        expect(find.text('Privacy Policy'), findsWidgets);
         expect(find.text('DATA & PRIVACY'), findsOneWidget);
         expect(find.text('On-device data storage'), findsOneWidget);
-        expect(find.text('Decentralized Audius protocol'), findsOneWidget);
+        expect(find.text('Audius services'), findsOneWidget);
         expect(find.text('Zero analytics & tracking'), findsOneWidget);
-        // Privacy Policy must have its single canonical entry point in About
-        expect(find.text('POLICY & LEGAL'), findsNothing);
-        expect(find.text('Privacy Policy'), findsNothing);
+        expect(find.text('ONLINE POLICY'), findsOneWidget);
+        expect(find.text('View Privacy Policy Online'), findsOneWidget);
 
         // Verify notifications are NOT present in Privacy
         expect(find.text('Media Notifications'), findsNothing);
         expect(find.text('Notification Permission'), findsNothing);
         expect(find.text('SYSTEM PERMISSIONS'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'PrivacyView tapping View Privacy Policy Online launches canonical URL',
+      (tester) async {
+        final List<MethodCall> methodCalls = [];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('com.jklabs.audifi/launcher'),
+          (MethodCall methodCall) async {
+            methodCalls.add(methodCall);
+            return true;
+          },
+        );
+
+        await tester.pumpWidget(createTestHarness(const PrivacyView()));
+        await tester.pumpAndSettle();
+
+        expect(find.text('View Privacy Policy Online'), findsOneWidget);
+        await tester.tap(find.text('View Privacy Policy Online'));
+        await tester.pumpAndSettle();
+
+        expect(methodCalls, isNotEmpty);
+        expect(methodCalls.first.method, equals('launchUrl'));
+        expect(
+          methodCalls.first.arguments['url'],
+          equals('https://jklabs-apps.github.io/audifi/privacy-policy.html'),
+        );
       },
     );
 
@@ -183,7 +211,8 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('LEGAL & LICENSES'), findsOneWidget);
-        expect(find.text('Privacy Policy'), findsOneWidget);
+        // Duplicate Privacy Policy navigation must be removed from About
+        expect(find.text('Privacy Policy'), findsNothing);
         expect(find.text('Third-party licenses'), findsOneWidget);
         expect(find.text('Open-source licenses'), findsNothing);
 
@@ -211,21 +240,13 @@ void main() {
     });
 
     testWidgets(
-      'AboutView tapping Privacy Policy safely routes to in-app privacy disclosures',
+      'AboutView eliminates duplicate Privacy Policy navigation',
       (tester) async {
         await tester.pumpWidget(createTestHarness(const AboutView()));
         await tester.pumpAndSettle();
 
-        // Tap Privacy Policy
-        await tester.scrollUntilVisible(find.text('Privacy Policy'), 100.0);
-        await tester.tap(find.text('Privacy Policy'));
-        await tester.pumpAndSettle();
-
-        // Safely navigates to PrivacyView without placeholder domains or broken external links
-        expect(find.byType(PrivacyView), findsOneWidget);
-        expect(find.text('On-device data storage'), findsOneWidget);
-        expect(find.text('Decentralized Audius protocol'), findsOneWidget);
-        expect(find.text('Zero analytics & tracking'), findsOneWidget);
+        // Duplicate navigation removed: Settings -> Privacy Policy is single destination
+        expect(find.text('Privacy Policy'), findsNothing);
       },
     );
 

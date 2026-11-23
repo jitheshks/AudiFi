@@ -8,12 +8,11 @@ abstract final class ApiConstants {
   /// Standard app identifier for Audius API rate limiting and metrics.
   static const String defaultAppName = 'AudiFi';
 
-  /// Privacy policy URL hosted for store compliance.
+  /// Canonical privacy policy URL hosted for store compliance and transparency disclosures.
   /// Configurable at build time via `--dart-define=PRIVACY_POLICY_URL=https://...`.
-  /// Unset in pre-publication until hosting and domain infrastructure are finalized.
   static const String privacyPolicyUrl = String.fromEnvironment(
     'PRIVACY_POLICY_URL',
-    defaultValue: '',
+    defaultValue: 'https://jklabs-apps.github.io/audifi/privacy-policy.html',
   );
 
   /// Whether a valid production privacy policy URL has been configured.

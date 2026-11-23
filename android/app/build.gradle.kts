@@ -37,24 +37,36 @@ android {
         versionName = flutter.versionName
     }
 
-    signingConfigs {
+        signingConfigs {
         create("release") {
+            require(keystorePropertiesFile.exists()) {
+                "Release signing configuration missing: android/key.properties"
+            }
+
             val keyFile = keystoreProperties.getProperty("storeFile")
-            if (keyFile != null) {
-                storeFile = rootProject.file(keyFile)
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+                ?: error("storeFile missing in android/key.properties")
+
+            storeFile = file(keyFile)
+
+            storePassword = keystoreProperties.getProperty("storePassword")
+                ?: error("storePassword missing in android/key.properties")
+
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+                ?: error("keyAlias missing in android/key.properties")
+
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+                ?: error("keyPassword missing in android/key.properties")
+
+            require(storeFile!!.exists()) {
+                "Release keystore does not exist: $storeFile"
             }
         }
     }
 
     buildTypes {
         release {
-            val releaseConfig = signingConfigs.getByName("release")
-            if (releaseConfig.storeFile != null && releaseConfig.storeFile!!.exists()) {
-                signingConfig = releaseConfig
-            }
+            signingConfig = signingConfigs.getByName("release")
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

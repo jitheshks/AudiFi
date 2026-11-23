@@ -325,9 +325,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(SettingsView), findsOneWidget);
 
-        // 6. Privacy
-        await tester.scrollUntilVisible(find.text('Privacy'), 100.0);
-        await tester.tap(find.text('Privacy'));
+        // 6. Privacy Policy
+        await tester.scrollUntilVisible(find.text('Privacy Policy'), 100.0);
+        await tester.tap(find.text('Privacy Policy'));
         await tester.pumpAndSettle();
         expect(find.byType(PrivacyView), findsOneWidget);
         await tester.tap(find.text('‹ Settings'));

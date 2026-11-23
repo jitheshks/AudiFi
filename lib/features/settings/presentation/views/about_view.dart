@@ -2,16 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../../app/router/route_paths.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/external_launcher.dart';
 import '../../../../shared/widgets/audifi_card.dart';
-import 'privacy_view.dart';
 
 /// Full-screen About settings page adhering strictly to the Appearance reference design.
 /// Displays application identity, version, clear Audius protocol attribution,
-/// privacy policy access, and Flutter-provided third-party component licenses.
+/// and Flutter-provided third-party component licenses without duplicate privacy navigation.
 class AboutView extends ConsumerWidget {
   const AboutView({super.key});
 
@@ -180,169 +176,79 @@ class AboutView extends ConsumerWidget {
                 ),
               ),
 
-              // Card 2: Legal & Licenses rows
+              // Card 2: Third-party licenses row
               AudifiCard(
                 padding: EdgeInsets.zero,
                 hasShadow: false,
-                child: Column(
-                  children: [
-                    Semantics(
-                      button: true,
-                      label: 'Privacy Policy',
-                      child: InkWell(
-                        onTap: () async {
-                          if (ApiConstants.hasPrivacyPolicyUrl) {
-                            final launched = await ExternalLauncher.launchUrl(
-                              ApiConstants.privacyPolicyUrl,
-                            );
-                            if (!launched && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Unable to open privacy policy in browser.',
-                                  ),
-                                  duration: Duration(seconds: 4),
-                                ),
-                              );
-                            }
-                          } else {
-                            if (context.mounted) {
-                              if (GoRouter.maybeOf(context) != null) {
-                                context.push(RoutePaths.settingsPrivacy);
-                              } else {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => const PrivacyView(),
-                                  ),
-                                );
-                              }
-                            }
-                          }
-                        },
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(16.0),
-                        ),
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 66.0),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 14.0,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Privacy Policy',
-                                      style: TextStyle(
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.w600,
-                                        color: colors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3.0),
-                                    Text(
-                                      'Review data handling and protocol disclosures',
-                                      style: TextStyle(
-                                        fontSize: 13.0,
-                                        color: colors.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                ApiConstants.hasPrivacyPolicyUrl
-                                    ? Icons.open_in_new_rounded
-                                    : Icons.chevron_right_rounded,
-                                color: colors.textMuted.withValues(alpha: 0.6),
-                                size: 18.0,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Divider(
-                      color: colors.surface2.withValues(alpha: 0.6),
-                      height: 1.0,
-                    ),
-                    Semantics(
-                      button: true,
-                      label: 'Third-party licenses',
-                      child: InkWell(
-                        onTap: () {
-                          showLicensePage(
-                            context: context,
-                            applicationName: 'AudiFi',
-                            applicationVersion: '1.0.0 (Build 1)',
-                            applicationIcon: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                width: 48.0,
-                                height: 48.0,
-                                decoration: BoxDecoration(
-                                  color: colors.accent,
-                                  borderRadius: BorderRadius.circular(14.0),
-                                ),
-                                child: const Icon(
-                                  Icons.graphic_eq_rounded,
-                                  color: Colors.white,
-                                  size: 28.0,
-                                ),
-                              ),
+                child: Semantics(
+                  button: true,
+                  label: 'Third-party licenses',
+                  child: InkWell(
+                    onTap: () {
+                      showLicensePage(
+                        context: context,
+                        applicationName: 'AudiFi',
+                        applicationVersion: '1.0.0 (Build 1)',
+                        applicationIcon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            width: 48.0,
+                            height: 48.0,
+                            decoration: BoxDecoration(
+                              color: colors.accent,
+                              borderRadius: BorderRadius.circular(14.0),
                             ),
-                          );
-                        },
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(16.0),
-                        ),
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 66.0),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 14.0,
+                            child: const Icon(
+                              Icons.graphic_eq_rounded,
+                              color: Colors.white,
+                              size: 28.0,
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Third-party licenses',
-                                      style: TextStyle(
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.w600,
-                                        color: colors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3.0),
-                                    Text(
-                                      'Software notices and licenses for included libraries',
-                                      style: TextStyle(
-                                        fontSize: 13.0,
-                                        color: colors.textMuted,
-                                      ),
-                                    ),
-                                  ],
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 66.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 14.0,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Third-party licenses',
+                                  style: TextStyle(
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                  ),
                                 ),
-                              ),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                color: colors.textMuted.withValues(alpha: 0.5),
-                                size: 20.0,
-                              ),
-                            ],
+                                const SizedBox(height: 3.0),
+                                Text(
+                                  'Software notices and licenses for included libraries',
+                                  style: TextStyle(
+                                    fontSize: 13.0,
+                                    color: colors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: colors.textMuted.withValues(alpha: 0.5),
+                            size: 20.0,
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
 

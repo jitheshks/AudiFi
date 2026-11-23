@@ -300,12 +300,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Privacy'), findsOneWidget);
+      expect(find.text('Privacy Policy'), findsWidgets);
       expect(find.text('On-device data storage'), findsOneWidget);
-      expect(find.text('Decentralized Audius protocol'), findsOneWidget);
+      expect(find.text('Audius services'), findsOneWidget);
       expect(find.text('Zero analytics & tracking'), findsOneWidget);
-      // Privacy Policy has its canonical single entry point in AboutView
-      expect(find.text('Privacy Policy'), findsNothing);
 
       // Verify no notification controls remain in Privacy
       expect(find.text('Media Notifications'), findsNothing);

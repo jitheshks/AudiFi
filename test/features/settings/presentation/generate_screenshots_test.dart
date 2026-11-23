@@ -9,9 +9,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:audifi/core/theme/app_theme.dart';
 import 'package:audifi/features/settings/presentation/views/about_view.dart';
 import 'package:audifi/features/settings/presentation/views/privacy_view.dart';
+import 'package:audifi/features/settings/presentation/views/settings_view.dart';
 
 void main() {
-  testWidgets('Generate final screenshots of Privacy and About screens', (
+  testWidgets('Generate final screenshots of Settings, Privacy, and About screens', (
     tester,
   ) async {
     Future<void> capture(
@@ -53,9 +54,28 @@ void main() {
           dir.createSync(recursive: true);
         }
         File('assets/screenshots/$fileName').writeAsBytesSync(bytes);
+
+        final artifactDir = Directory(
+          '/home/blackhat/.gemini/antigravity-cli/brain/d1b881f1-066d-4082-9c1e-6b227736528e',
+        );
+        if (artifactDir.existsSync()) {
+          File(
+            '/home/blackhat/.gemini/antigravity-cli/brain/d1b881f1-066d-4082-9c1e-6b227736528e/$fileName',
+          ).writeAsBytesSync(bytes);
+        }
       });
     }
 
+    await capture(
+      const SettingsView(),
+      AppTheme.darkTheme,
+      'settings_screen_dark.png',
+    );
+    await capture(
+      const SettingsView(),
+      AppTheme.lightTheme,
+      'settings_screen_light.png',
+    );
     await capture(
       const PrivacyView(),
       AppTheme.darkTheme,
