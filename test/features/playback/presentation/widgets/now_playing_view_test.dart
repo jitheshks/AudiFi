@@ -5,7 +5,10 @@ import 'package:audifi/features/playback/domain/entities/repeat_mode.dart';
 import 'package:audifi/features/playback/presentation/controllers/playback_controller.dart';
 import 'package:audifi/features/playback/presentation/views/now_playing_view.dart';
 import 'package:audifi/features/playback/presentation/widgets/now_playing/ambient_gradient_background.dart';
+import 'package:audifi/features/playback/presentation/widgets/now_playing/now_playing_app_bar.dart';
+import 'package:audifi/features/playback/presentation/widgets/queue/queue_sheet.dart';
 import 'package:audifi/features/tracks/domain/entities/track.dart';
+import 'package:audifi/shared/widgets/audifi_track_options_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide RepeatMode;
@@ -102,9 +105,13 @@ void main() {
       // Verify header & ambient background
       expect(find.text('NOW PLAYING'), findsOneWidget);
       expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.queue_music_rounded), findsNWidgets(2));
+      expect(find.byIcon(Icons.more_vert_rounded), findsOneWidget);
+      // Exactly one Queue entry point exists (in the bottom action area)
+      expect(find.byIcon(Icons.queue_music_rounded), findsOneWidget);
       expect(find.text('Queue'), findsOneWidget);
-      expect(find.text('Audio Info'), findsOneWidget);
+      // Audio Info button is completely removed
+      expect(find.text('Audio Info'), findsNothing);
+      expect(find.byIcon(Icons.graphic_eq_rounded), findsNothing);
       expect(find.text('Lyrics'), findsNothing);
       expect(find.byIcon(Icons.lyrics_rounded), findsNothing);
       expect(find.byType(AmbientGradientBackground), findsOneWidget);
@@ -297,5 +304,154 @@ void main() {
         }
       },
     );
+
+    testWidgets('bottom Queue button opens QueueSheet as single entry point', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(412, 915);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      const activeTrack = Track(
+        id: 'np_queue_test',
+        title: 'Queue Test Track',
+        user: User(id: 'u1', name: 'Queue Artist', handle: 'queue'),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...createStubRepositoryOverrides(),
+            playbackControllerProvider.overrideWith(
+              () => TestPlaybackController(
+                const PlaybackState(
+                  currentTrack: activeTrack,
+                  status: PlaybackStatus.playing,
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(home: NowPlayingView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Top bar should NOT have a queue button
+      // Find the top bar
+      final topBar = find.byType(NowPlayingAppBar);
+      expect(
+        find.descendant(of: topBar, matching: find.byIcon(Icons.queue_music_rounded)),
+        findsNothing,
+      );
+
+      // Bottom Queue button is the sole queue entry point
+      final queueButton = find.widgetWithText(TextButton, 'Queue');
+      expect(queueButton, findsOneWidget);
+
+      await tester.ensureVisible(queueButton);
+      await tester.tap(queueButton);
+      await tester.pumpAndSettle();
+
+      // Verify QueueSheet opened
+      expect(find.byType(QueueSheet), findsOneWidget);
+      expect(find.text('Up Next'), findsOneWidget);
+    });
+
+    testWidgets('top-right overflow menu opens track options sheet', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(412, 915);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      const activeTrack = Track(
+        id: 'np_options_test',
+        title: 'Options Test Track',
+        user: User(id: 'u1', name: 'Options Artist', handle: 'options'),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...createStubRepositoryOverrides(),
+            playbackControllerProvider.overrideWith(
+              () => TestPlaybackController(
+                const PlaybackState(
+                  currentTrack: activeTrack,
+                  status: PlaybackStatus.playing,
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(home: NowPlayingView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap 3-dot overflow menu
+      final moreButton = find.byIcon(Icons.more_vert_rounded);
+      expect(moreButton, findsOneWidget);
+
+      await tester.tap(moreButton);
+      await tester.pumpAndSettle();
+
+      // Verify track options sheet opened with standard actions
+      expect(find.byType(AudifiTrackOptionsSheet), findsOneWidget);
+      // For the currently playing track, Play Next is hidden per spec
+      expect(find.text('Play Next'), findsNothing);
+      expect(find.text('Add to Queue'), findsOneWidget);
+      expect(find.text('Add to Playlist'), findsOneWidget);
+      expect(find.text('Go to Artist'), findsOneWidget);
+      // Verify no Audio Info menu item exists
+      expect(find.text('Audio Info'), findsNothing);
+    });
+
+    testWidgets('remains responsive without overflow across portrait and landscape', (
+      tester,
+    ) async {
+      const activeTrack = Track(
+        id: 'np_responsive_test',
+        title: 'Responsive Track',
+        genre: 'Electronic',
+        duration: 200,
+        user: User(id: 'u1', name: 'Responsive Artist', handle: 'resp'),
+      );
+
+      for (final size in [
+        const Size(360, 640),  // Compact mobile portrait
+        const Size(412, 915),  // Modern phone portrait (e.g. POCO F7)
+        const Size(800, 1280), // Tablet portrait
+        const Size(915, 412),  // Phone landscape
+      ]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              ...createStubRepositoryOverrides(),
+              playbackControllerProvider.overrideWith(
+                () => TestPlaybackController(
+                  const PlaybackState(
+                    currentTrack: activeTrack,
+                    status: PlaybackStatus.playing,
+                    duration: Duration(seconds: 200),
+                  ),
+                ),
+              ),
+            ],
+            child: const MaterialApp(home: NowPlayingView()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify core elements exist and no overflow occurred
+        expect(find.text('NOW PLAYING'), findsOneWidget);
+        expect(find.text('Queue'), findsOneWidget);
+        expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+    });
   });
 }

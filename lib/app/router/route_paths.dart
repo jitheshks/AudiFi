@@ -9,7 +9,6 @@ abstract final class RoutePaths {
   static const String settingsAccent = '/settings/appearance/accent';
   static const String settingsPlayback = '/settings/playback';
   static const String settingsNotifications = '/settings/notifications';
-  static const String settingsAudio = '/settings/audio';
   static const String settingsMusic = '/settings/music';
   static const String settingsPrivacy = '/settings/privacy';
   static const String settingsAbout = '/settings/about';

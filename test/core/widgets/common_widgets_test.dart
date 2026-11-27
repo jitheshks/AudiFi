@@ -1,3 +1,5 @@
+import 'package:audifi/core/theme/app_colors.dart';
+import 'package:audifi/core/theme/app_radius.dart';
 import 'package:audifi/core/theme/app_theme.dart';
 import 'package:audifi/shared/widgets/audifi_app_bar.dart';
 import 'package:audifi/shared/widgets/audifi_button.dart';
@@ -141,11 +143,15 @@ void main() {
   group('AudifiSearchField', () {
     testWidgets('accepts text input and clears with button', (tester) async {
       final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      var cleared = false;
+
       await tester.pumpWidget(
         testWrapper(
           AudifiSearchField(
             controller: controller,
             hintText: 'Search songs...',
+            onClear: () => cleared = true,
           ),
         ),
       );
@@ -161,7 +167,247 @@ void main() {
       await tester.tap(find.byIcon(Icons.close_rounded));
       await tester.pump();
       expect(controller.text, '');
+      expect(cleared, isTrue);
     });
+
+    testWidgets(
+      'suppresses nested InputDecoration borders and applies outer container focus state in dark theme',
+      (tester) async {
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: AudifiSearchField(
+                  controller: controller,
+                  hintText: 'Search songs, artists, or playlists',
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final decoration = textField.decoration!;
+        expect(decoration.border, InputBorder.none);
+        expect(decoration.enabledBorder, InputBorder.none);
+        expect(decoration.focusedBorder, InputBorder.none);
+        expect(decoration.disabledBorder, InputBorder.none);
+        expect(decoration.errorBorder, InputBorder.none);
+        expect(decoration.focusedErrorBorder, InputBorder.none);
+        expect(decoration.filled, isFalse);
+
+        // Verify resolved InputDecorator has no inner border when unfocused or focused
+        InputDecorator inputDecorator = tester.widget<InputDecorator>(
+          find.byType(InputDecorator),
+        );
+        expect(inputDecorator.decoration.focusedBorder, InputBorder.none);
+        expect(inputDecorator.decoration.enabledBorder, InputBorder.none);
+
+        // Unfocused outer container styling
+        final containerFinder = find.descendant(
+          of: find.byType(AudifiSearchField),
+          matching: find.byType(AnimatedContainer),
+        );
+        var container = tester.widget<AnimatedContainer>(containerFinder);
+        var boxDecoration = container.decoration! as BoxDecoration;
+        expect(boxDecoration.color, AppColors.darkSurface1);
+        expect(boxDecoration.borderRadius, AppRadius.inputBorder);
+        expect(
+          boxDecoration.border,
+          Border.all(color: Colors.transparent, width: 1.5),
+        );
+
+        var searchIcon = tester.widget<Icon>(find.byIcon(Icons.search_rounded));
+        expect(searchIcon.color, AppColors.darkTextMuted);
+
+        // Tap search field to focus
+        await tester.tap(find.byType(TextField));
+        await tester.pumpAndSettle();
+
+        expect(textField.focusNode!.hasFocus, isTrue);
+        inputDecorator = tester.widget<InputDecorator>(
+          find.byType(InputDecorator),
+        );
+        expect(inputDecorator.isFocused, isTrue);
+        expect(inputDecorator.decoration.focusedBorder, InputBorder.none);
+
+        container = tester.widget<AnimatedContainer>(containerFinder);
+        boxDecoration = container.decoration! as BoxDecoration;
+        expect(boxDecoration.color, AppColors.darkSurface1);
+        expect(boxDecoration.borderRadius, AppRadius.inputBorder);
+        expect(
+          boxDecoration.border,
+          Border.all(
+            color: AppColors.accent.withValues(alpha: 0.55),
+            width: 1.5,
+          ),
+        );
+
+        searchIcon = tester.widget<Icon>(find.byIcon(Icons.search_rounded));
+        expect(searchIcon.color, AppColors.accent);
+
+        // Unfocus restores unfocused appearance
+        textField.focusNode!.unfocus();
+        await tester.pumpAndSettle();
+
+        container = tester.widget<AnimatedContainer>(containerFinder);
+        boxDecoration = container.decoration! as BoxDecoration;
+        expect(
+          boxDecoration.border,
+          Border.all(color: Colors.transparent, width: 1.5),
+        );
+        searchIcon = tester.widget<Icon>(find.byIcon(Icons.search_rounded));
+        expect(searchIcon.color, AppColors.darkTextMuted);
+      },
+    );
+
+    testWidgets(
+      'renders safely without LateInitializationError across reassemble, outer-container tap, focus, and unfocus',
+      (tester) async {
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: AudifiSearchField(controller: controller),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+
+        // Trigger reassemble on the mounted State (as happens on hot reload)
+        // ignore: invalid_use_of_protected_member
+        tester.state(find.byType(AudifiSearchField)).reassemble();
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        final containerFinder = find.descendant(
+          of: find.byType(AudifiSearchField),
+          matching: find.byType(AnimatedContainer),
+        );
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final focusNode = textField.focusNode!;
+
+        // Initial unfocused state
+        expect(focusNode.hasFocus, isFalse);
+        var boxDecoration =
+            tester.widget<AnimatedContainer>(containerFinder).decoration!
+                as BoxDecoration;
+        expect(
+          boxDecoration.border,
+          Border.all(color: Colors.transparent, width: 1.5),
+        );
+
+        // Tap outer container (search icon area outside TextField text box)
+        await tester.tap(find.byIcon(Icons.search_rounded));
+        await tester.pumpAndSettle();
+
+        expect(focusNode.hasFocus, isTrue);
+        boxDecoration =
+            tester.widget<AnimatedContainer>(containerFinder).decoration!
+                as BoxDecoration;
+        expect(
+          boxDecoration.border,
+          Border.all(
+            color: AppColors.accent.withValues(alpha: 0.55),
+            width: 1.5,
+          ),
+        );
+
+        // Unfocus restores transparent outer border
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+
+        expect(focusNode.hasFocus, isFalse);
+        boxDecoration =
+            tester.widget<AnimatedContainer>(containerFinder).decoration!
+                as BoxDecoration;
+        expect(
+          boxDecoration.border,
+          Border.all(color: Colors.transparent, width: 1.5),
+        );
+      },
+    );
+
+    testWidgets(
+      'supports externally owned FocusNode without disposing it on unmount',
+      (tester) async {
+        final controller = TextEditingController();
+        final externalFocusNode = FocusNode();
+        final replacementFocusNode = FocusNode();
+        addTearDown(() {
+          controller.dispose();
+          externalFocusNode.dispose();
+          replacementFocusNode.dispose();
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: AudifiSearchField(
+                controller: controller,
+                focusNode: externalFocusNode,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        externalFocusNode.requestFocus();
+        await tester.pumpAndSettle();
+        expect(externalFocusNode.hasFocus, isTrue);
+
+        final containerFinder = find.descendant(
+          of: find.byType(AudifiSearchField),
+          matching: find.byType(AnimatedContainer),
+        );
+        var boxDecoration =
+            tester.widget<AnimatedContainer>(containerFinder).decoration!
+                as BoxDecoration;
+        expect(
+          boxDecoration.border,
+          Border.all(
+            color: AppColors.accent.withValues(alpha: 0.55),
+            width: 1.5,
+          ),
+        );
+
+        // Swap to another external FocusNode
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: AudifiSearchField(
+                controller: controller,
+                focusNode: replacementFocusNode,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Unmount widget and verify externally owned FocusNodes remain usable
+        await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+        await tester.pumpAndSettle();
+
+        expect(() => externalFocusNode.addListener(() {}), returnsNormally);
+        expect(() => replacementFocusNode.addListener(() {}), returnsNormally);
+      },
+    );
   });
 
   group('AudifiEmptyState', () {

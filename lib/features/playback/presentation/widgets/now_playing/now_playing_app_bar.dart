@@ -3,7 +3,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../queue/queue_sheet.dart';
 
 /// Top app bar for the expanded Now Playing screen matching `.top` in `references/UI/audifi.html`.
 class NowPlayingAppBar extends StatelessWidget {
@@ -52,34 +51,22 @@ class NowPlayingAppBar extends StatelessWidget {
               ),
             ),
           ),
-          // Queue sheet button
-          SizedBox(
-            width: 48.0,
-            height: 48.0,
-            child: IconButton(
-              onPressed: () => QueueSheet.show(context),
-              tooltip: 'Open playback queue',
-              icon: Icon(
-                Icons.queue_music_rounded,
-                color: colors.textPrimary,
-                size: 24.0,
-              ),
-            ),
-          ),
           if (onMoreTap != null)
             SizedBox(
               width: 48.0,
               height: 48.0,
               child: IconButton(
                 onPressed: onMoreTap,
-                tooltip: 'Track options and audio info',
+                tooltip: 'Track options',
                 icon: Icon(
                   Icons.more_vert_rounded,
                   color: colors.textPrimary,
                   size: 24.0,
                 ),
               ),
-            ),
+            )
+          else
+            const SizedBox(width: 48.0, height: 48.0),
         ],
       ),
     );

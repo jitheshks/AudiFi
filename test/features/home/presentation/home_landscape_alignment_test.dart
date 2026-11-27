@@ -5,7 +5,6 @@ import 'package:audifi/features/library/presentation/controllers/listening_histo
 import 'package:audifi/features/playback/presentation/controllers/playback_controller.dart';
 import 'package:audifi/features/playback/presentation/widgets/mini_player/mini_player.dart';
 import 'package:audifi/features/tracks/domain/entities/track.dart';
-import 'package:audifi/shared/widgets/audifi_button.dart';
 import 'package:audifi/shared/widgets/audifi_media_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,19 +86,13 @@ void main() {
       // Portrait: bottom nav bar visible, no NavigationRail
       expect(find.byType(NavigationRail), findsNothing);
 
-      // Verify greeting, button, and summary cards are present
+      // Verify greeting and summary cards are present, and redundant hero button is removed
       final greetingFinder = find.textContaining('Good ');
       expect(greetingFinder, findsOneWidget);
       final greetingOffset = tester.getTopLeft(greetingFinder);
       expect(greetingOffset.dx, equals(20.0));
 
-      final resumeBtnFinder = find.widgetWithText(
-        AudifiButton,
-        'Resume listening',
-      );
-      expect(resumeBtnFinder, findsOneWidget);
-      final btnOffset = tester.getTopLeft(resumeBtnFinder);
-      expect(btnOffset.dx, equals(20.0));
+      expect(find.text('Resume listening'), findsNothing);
 
       final likedFinder = find.ancestor(
         of: find.text('Liked'),
@@ -169,16 +162,10 @@ void main() {
         // Top spacing is compact: topInset (24) + 2.0 topSpacing + 2.0 padding = 28.0
         expect(greetingOffset.dy, equals(28.0));
 
-        // 3. Resume Listening button is left-aligned with greeting
-        final resumeBtnFinder = find.widgetWithText(
-          AudifiButton,
-          'Resume listening',
-        );
-        expect(resumeBtnFinder, findsOneWidget);
-        final btnOffset = tester.getTopLeft(resumeBtnFinder);
-        expect(btnOffset.dx, equals(expectedLeftMargin));
+        // 3. Redundant hero button is removed to avoid playback clash
+        expect(find.text('Resume listening'), findsNothing);
 
-        // 4. Summary cards are left-aligned with greeting and button
+        // 4. Summary cards are left-aligned with greeting
         final likedFinder = find.ancestor(
           of: find.text('Liked'),
           matching: find.byType(InkWell),
@@ -263,10 +250,7 @@ void main() {
       final greetingOffset = tester.getTopLeft(find.textContaining('Good '));
       expect(greetingOffset.dx, equals(expectedLeftMargin));
 
-      final btnOffset = tester.getTopLeft(
-        find.widgetWithText(AudifiButton, 'Resume listening'),
-      );
-      expect(btnOffset.dx, equals(expectedLeftMargin));
+      expect(find.text('Resume listening'), findsNothing);
 
       final sectionOffset = tester.getTopLeft(find.text('Recently Played'));
       expect(sectionOffset.dx, equals(expectedLeftMargin));
@@ -306,17 +290,12 @@ void main() {
           .width;
       final expectedLeftMargin = railWidth + 1.0 + 24.0;
 
-      // Greeting, button, cards, section headers all align at expectedLeftMargin
+      // Greeting, cards, section headers all align at expectedLeftMargin
       expect(
         tester.getTopLeft(find.textContaining('Good ')).dx,
         equals(expectedLeftMargin),
       );
-      expect(
-        tester
-            .getTopLeft(find.widgetWithText(AudifiButton, 'Resume listening'))
-            .dx,
-        equals(expectedLeftMargin),
-      );
+      expect(find.text('Resume listening'), findsNothing);
       expect(
         tester.getTopLeft(find.text('Recently Played')).dx,
         equals(expectedLeftMargin),

@@ -1,5 +1,6 @@
 import '../../../../shared/models/artwork.dart';
 import '../../../artists/domain/entities/user.dart';
+import 'album_backlink.dart';
 
 /// Pure domain entity representing an Audius track.
 class Track {
@@ -18,6 +19,7 @@ class Track {
     this.artwork,
     this.user,
     this.permalink,
+    this.albumBacklink,
     this.isStreamable = true,
     this.isDownloadable,
     this.isDownloadGated = false,
@@ -65,6 +67,9 @@ class Track {
 
   /// Canonical permalink path on audius.co.
   final String? permalink;
+
+  /// Optional backlink to parent album/collection from Audius metadata.
+  final AlbumBacklink? albumBacklink;
 
   /// Whether the track is streamable.
   final bool isStreamable;

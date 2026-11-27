@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:audifi/core/theme/app_colors.dart';
+import 'package:audifi/core/theme/app_theme.dart';
 import 'package:audifi/features/search/domain/entities/search_result.dart';
 import 'package:audifi/features/search/presentation/controllers/search_controller.dart';
 import 'package:audifi/features/search/presentation/views/search_view.dart';
@@ -11,11 +13,14 @@ import '../../../test_helpers/stub_repositories.dart';
 
 void main() {
   group('SearchView — Search & Browse Functional Verification', () {
-    Widget createTestWidget({StubSearchRepository? searchRepo}) {
+    Widget createTestWidget({
+      StubSearchRepository? searchRepo,
+      ThemeData? theme,
+    }) {
       final repo = searchRepo ?? StubSearchRepository();
       return ProviderScope(
         overrides: [...createStubRepositoryOverrides(searchRepo: repo)],
-        child: const MaterialApp(home: SearchView()),
+        child: MaterialApp(theme: theme, home: const SearchView()),
       );
     }
 
@@ -137,6 +142,61 @@ void main() {
 
       expect(find.byKey(const ValueKey('search_recent_list')), findsOneWidget);
     });
+
+    testWidgets(
+      'search field in dark theme shows outer focus border without inner outline and preserves clear & submit',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(createTestWidget(theme: AppTheme.darkTheme));
+        await tester.pumpAndSettle();
+
+        final textFieldFinder = find.byType(TextField);
+        final inputDecorator = tester.widget<InputDecorator>(
+          find.byType(InputDecorator),
+        );
+        expect(inputDecorator.decoration.focusedBorder, InputBorder.none);
+        expect(inputDecorator.decoration.filled, isFalse);
+
+        // Tap outer search container icon area to focus
+        await tester.tap(find.byIcon(Icons.search_rounded).first);
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(textFieldFinder);
+        expect(textField.focusNode!.hasFocus, isTrue);
+        expect(textField.textInputAction, TextInputAction.search);
+
+        final outerContainer = tester.widget<AnimatedContainer>(
+          find.descendant(
+            of: find.byType(SearchView),
+            matching: find.byType(AnimatedContainer),
+          ).first,
+        );
+        final decoration = outerContainer.decoration! as BoxDecoration;
+        expect(
+          decoration.border,
+          Border.all(
+            color: AppColors.accent.withValues(alpha: 0.55),
+            width: 1.5,
+          ),
+        );
+
+        // Submit query via keyboard action
+        await tester.enterText(textFieldFinder, 'Vaporwave');
+        await tester.testTextInput.receiveAction(TextInputAction.search);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Result for Vaporwave'), findsOneWidget);
+
+        // Tap clear button
+        await tester.tap(find.byIcon(Icons.close_rounded));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const ValueKey('search_recent_list')), findsOneWidget);
+      },
+    );
   });
 }
 

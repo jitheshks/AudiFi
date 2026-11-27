@@ -8,10 +8,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/theme_controller.dart';
 import '../../../../shared/widgets/audifi_empty_state.dart';
+import '../../../../shared/widgets/audifi_track_options_sheet.dart';
 import '../controllers/artwork_palette_controller.dart';
 import '../controllers/playback_controller.dart';
 import '../widgets/now_playing/ambient_gradient_background.dart';
-import '../widgets/now_playing/audio_info_sheet.dart';
 import '../widgets/now_playing/now_playing_app_bar.dart';
 import '../widgets/now_playing/now_playing_artwork.dart';
 import '../widgets/now_playing/now_playing_controls.dart';
@@ -70,7 +70,7 @@ class NowPlayingView extends ConsumerWidget {
           child: Column(
             children: [
               NowPlayingAppBar(
-                onMoreTap: () => AudioInfoSheet.show(context, track: track),
+                onMoreTap: () => AudifiTrackOptionsSheet.show(context, track),
               ),
               Expanded(
                 child: Center(
@@ -207,48 +207,23 @@ class NowPlayingView extends ConsumerWidget {
                           ),
                           AppSpacing.vGap16,
 
-                          // Bottom action shortcuts matching .bot in audifi.html: Queue & Audio Info
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colors.textMuted,
-                                    minimumSize: const Size(0, 48),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0,
-                                    ),
-                                  ),
-                                  icon: const Icon(
-                                    Icons.queue_music_rounded,
-                                    size: 18.0,
-                                  ),
-                                  label: const Text('Queue', maxLines: 1),
-                                  onPressed: () => QueueSheet.show(context),
+                          // Bottom action area: single Queue button
+                          Center(
+                            child: TextButton.icon(
+                              style: TextButton.styleFrom(
+                                foregroundColor: colors.textMuted,
+                                minimumSize: const Size(120, 48),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
                                 ),
                               ),
-                              AppSpacing.hGap12,
-                              Expanded(
-                                child: TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colors.textMuted,
-                                    minimumSize: const Size(0, 48),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0,
-                                    ),
-                                  ),
-                                  icon: const Icon(
-                                    Icons.graphic_eq_rounded,
-                                    size: 18.0,
-                                  ),
-                                  label: const Text('Audio Info', maxLines: 1),
-                                  onPressed: () => AudioInfoSheet.show(
-                                    context,
-                                    track: track,
-                                  ),
-                                ),
+                              icon: const Icon(
+                                Icons.queue_music_rounded,
+                                size: 18.0,
                               ),
-                            ],
+                              label: const Text('Queue', maxLines: 1),
+                              onPressed: () => QueueSheet.show(context),
+                            ),
                           ),
                           AppSpacing.vGap16,
                         ],

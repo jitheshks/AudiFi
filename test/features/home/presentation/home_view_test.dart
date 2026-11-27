@@ -62,8 +62,8 @@ void main() {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
-        // Fresh user sees "Explore Discover" hero button
-        expect(find.text('Explore Discover'), findsOneWidget);
+        // Fresh user sees dashboard without redundant hero CTA
+        expect(find.text('Resume listening'), findsNothing);
 
         // Welcoming personal dashboard card
         expect(find.text('Your Personal Music Dashboard'), findsOneWidget);
@@ -107,8 +107,8 @@ void main() {
             .addTrack(testTrack1);
         await tester.pumpAndSettle();
 
-        // Hero button adapts to "Resume listening"
-        expect(find.text('Resume listening'), findsOneWidget);
+        // Redundant hero button is removed to avoid clash with persistent mini-player
+        expect(find.text('Resume listening'), findsNothing);
 
         // Shows Recently Played
         expect(find.text('Recently Played'), findsOneWidget);

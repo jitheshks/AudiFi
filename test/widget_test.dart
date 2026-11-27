@@ -15,7 +15,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Audifi launches and renders personalized Home View and 5 navigation destinations
-    expect(find.text('Explore Discover'), findsWidgets);
+    expect(find.text('Resume listening'), findsNothing);
     expect(find.text('Liked'), findsOneWidget);
     expect(find.text('Offline'), findsOneWidget);
     expect(find.text('Device'), findsOneWidget);

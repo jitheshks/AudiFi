@@ -193,5 +193,105 @@ void main() {
       final prev = controller.stepToPrevious();
       expect(prev?.id, equals('t2'));
     });
+
+    test(
+      'Queue action semantics: Play Next inserts right after playing track (A -> X -> B -> C -> D)',
+      () {
+        const a = Track(id: 'A', title: 'Track A');
+        const b = Track(id: 'B', title: 'Track B');
+        const c = Track(id: 'C', title: 'Track C');
+        const d = Track(id: 'D', title: 'Track D');
+        const x = Track(id: 'X', title: 'Track X');
+
+        final controller = container.read(queueControllerProvider.notifier);
+        // A is actively playing at index 0
+        controller.setQueue([a, b, c, d], startIndex: 0);
+
+        // Selecting X -> Play Next
+        controller.playNext(x);
+
+        final queue = container.read(queueControllerProvider);
+        expect(
+          queue.items.map((t) => t.id).toList(),
+          equals(['A', 'X', 'B', 'C', 'D']),
+        );
+        // Playing track A remains active at index 0
+        expect(queue.currentIndex, equals(0));
+        expect(queue.currentTrack?.id, equals('A'));
+      },
+    );
+
+    test(
+      'Queue action semantics: Add to Queue appends to queue end (A -> B -> C -> D -> X)',
+      () {
+        const a = Track(id: 'A', title: 'Track A');
+        const b = Track(id: 'B', title: 'Track B');
+        const c = Track(id: 'C', title: 'Track C');
+        const d = Track(id: 'D', title: 'Track D');
+        const x = Track(id: 'X', title: 'Track X');
+
+        final controller = container.read(queueControllerProvider.notifier);
+        controller.setQueue([a, b, c, d], startIndex: 0);
+
+        // Selecting X -> Add to Queue
+        controller.addToQueue(x);
+
+        final queue = container.read(queueControllerProvider);
+        expect(
+          queue.items.map((t) => t.id).toList(),
+          equals(['A', 'B', 'C', 'D', 'X']),
+        );
+        expect(queue.currentIndex, equals(0));
+        expect(queue.currentTrack?.id, equals('A'));
+      },
+    );
+
+    test(
+      'Queue action semantics: Adding currently playing track appends duplicate at end without restarting playback',
+      () {
+        const a = Track(id: 'A', title: 'Track A');
+        const b = Track(id: 'B', title: 'Track B');
+        const c = Track(id: 'C', title: 'Track C');
+
+        final controller = container.read(queueControllerProvider.notifier);
+        controller.setQueue([a, b, c], startIndex: 0); // A is playing
+
+        // Adding current track A to queue
+        controller.addToQueue(a);
+
+        final queue = container.read(queueControllerProvider);
+        // Duplicate instance of A is at the end: [A, B, C, A]
+        expect(
+          queue.items.map((t) => t.id).toList(),
+          equals(['A', 'B', 'C', 'A']),
+        );
+        // Current index remains 0, playing track unchanged
+        expect(queue.currentIndex, equals(0));
+        expect(queue.currentTrack?.id, equals('A'));
+        expect(queue.items.length, equals(4));
+      },
+    );
+
+    test(
+      'reorderQueue maintains correct active track index with duplicate tracks',
+      () {
+        const a1 = Track(id: 'A', title: 'Track A (1)');
+        const b = Track(id: 'B', title: 'Track B');
+        const c = Track(id: 'C', title: 'Track C');
+        const a2 = Track(id: 'A', title: 'Track A (2)');
+
+        final controller = container.read(queueControllerProvider.notifier);
+        // Suppose the second instance of A is playing at index 3
+        controller.setQueue([a1, b, c, a2], startIndex: 3);
+
+        // Reorder B (index 1) to after C (index 3) -> [a1, c, b, a2]
+        controller.reorderQueue(1, 3);
+
+        final queue = container.read(queueControllerProvider);
+        // The active track was at index 3, and should remain at index 3
+        expect(queue.currentIndex, equals(3));
+        expect(queue.currentTrack?.title, equals('Track A (2)'));
+      },
+    );
   });
 }

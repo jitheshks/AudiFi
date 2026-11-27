@@ -6,26 +6,22 @@ class SettingsState {
   const SettingsState({
     this.pauseOnHeadphonesDisconnect = true,
     this.dynamicColors = true,
-    this.streamQuality = '320 kbps (High)',
     this.streamOnMobileData = true,
   });
 
   final bool pauseOnHeadphonesDisconnect;
   final bool dynamicColors;
-  final String streamQuality;
   final bool streamOnMobileData;
 
   SettingsState copyWith({
     bool? pauseOnHeadphonesDisconnect,
     bool? dynamicColors,
-    String? streamQuality,
     bool? streamOnMobileData,
   }) {
     return SettingsState(
       pauseOnHeadphonesDisconnect:
           pauseOnHeadphonesDisconnect ?? this.pauseOnHeadphonesDisconnect,
       dynamicColors: dynamicColors ?? this.dynamicColors,
-      streamQuality: streamQuality ?? this.streamQuality,
       streamOnMobileData: streamOnMobileData ?? this.streamOnMobileData,
     );
   }

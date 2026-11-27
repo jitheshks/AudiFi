@@ -1,5 +1,6 @@
 import '../../../../shared/models/artwork.dart';
 import '../../../artists/data/models/user_model.dart';
+import '../../domain/entities/album_backlink.dart';
 import '../../domain/entities/track.dart';
 
 /// Data transfer model for [Track], providing JSON serialization.
@@ -19,6 +20,7 @@ class TrackModel extends Track {
     super.artwork,
     super.user,
     super.permalink,
+    super.albumBacklink,
     super.isStreamable,
     super.isDownloadable,
     super.isDownloadGated,
@@ -41,6 +43,7 @@ class TrackModel extends Track {
       artwork: track.artwork,
       user: track.user,
       permalink: track.permalink,
+      albumBacklink: track.albumBacklink,
       isStreamable: track.isStreamable,
       isDownloadable: track.isDownloadable,
       isDownloadGated: track.isDownloadGated,
@@ -70,6 +73,9 @@ class TrackModel extends Track {
           ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
           : null,
       permalink: json['permalink'] as String?,
+      albumBacklink: json['album_backlink'] is Map<String, dynamic>
+          ? AlbumBacklink.fromJson(json['album_backlink'] as Map<String, dynamic>)
+          : null,
       isStreamable: json['is_streamable'] as bool? ?? true,
       isDownloadable: json['is_downloadable'] as bool?,
       isDownloadGated: json['is_download_gated'] as bool? ?? false,
@@ -98,6 +104,7 @@ class TrackModel extends Track {
             ? (user! as UserModel).toJson()
             : UserModel.fromEntity(user!).toJson(),
       if (permalink != null) 'permalink': permalink,
+      if (albumBacklink != null) 'album_backlink': albumBacklink!.toJson(),
       'is_streamable': isStreamable,
       'is_downloadable': isDownloadable,
       'is_download_gated': isDownloadGated,

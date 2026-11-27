@@ -37,7 +37,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // 1. Initial destination is Home
-        expect(find.text('Explore Discover'), findsWidgets);
+        expect(find.text('Resume listening'), findsNothing);
         expect(find.text('Liked'), findsOneWidget);
         expect(find.text('Offline'), findsOneWidget);
         expect(find.text('Device'), findsOneWidget);
@@ -69,7 +69,7 @@ void main() {
         await tester.tap(find.text('Settings'));
         await tester.pumpAndSettle();
         expect(find.text('PLAYBACK'), findsOneWidget);
-        expect(find.text('AUDIO'), findsOneWidget);
+        expect(find.text('MUSIC'), findsOneWidget);
         expect(find.text('APPEARANCE'), findsOneWidget);
 
         // 6. Navigate to Appearance drill-down matching appearance.png
@@ -380,7 +380,7 @@ void main() {
         AppNavigationShell.isBottomNavVisible('/settings/playback'),
         isFalse,
       );
-      expect(AppNavigationShell.isBottomNavVisible('/settings/audio'), isFalse);
+      expect(AppNavigationShell.isBottomNavVisible('/settings/music'), isFalse);
     });
   });
 }

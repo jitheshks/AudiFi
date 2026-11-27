@@ -157,20 +157,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               ),
             ),
 
-            // AUDIO
-            _buildSectionHeader(colors, 'AUDIO'),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: _buildSectionItem(
-                context: context,
-                colors: colors,
-                icon: AudifiWaveIcon(color: colors.accent, size: 20.0),
-                title: 'Audio',
-                subtitle: 'Equalizer and track information',
-                onTap: () => _navigateTo(RoutePaths.settingsAudio),
-              ),
-            ),
-
             // MUSIC
             _buildSectionHeader(colors, 'MUSIC'),
             Padding(

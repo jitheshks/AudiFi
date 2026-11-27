@@ -24,7 +24,6 @@ void main() {
       final state = container.read(settingsControllerProvider);
       expect(state.pauseOnHeadphonesDisconnect, isTrue);
       expect(state.dynamicColors, isTrue);
-      expect(state.streamQuality, equals('320 kbps (High)'));
     });
 
     test('setDynamicColors updates state and persists', () async {

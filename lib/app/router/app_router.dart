@@ -13,7 +13,6 @@ import '../../features/search/presentation/views/search_view.dart';
 import '../../features/settings/presentation/views/about_view.dart';
 import '../../features/settings/presentation/views/accent_color_view.dart';
 import '../../features/settings/presentation/views/appearance_view.dart';
-import '../../features/settings/presentation/views/audio_view.dart';
 import '../../features/settings/presentation/views/music_view.dart';
 import '../../features/settings/presentation/views/notifications_view.dart';
 import '../../features/settings/presentation/views/playback_view.dart';
@@ -122,14 +121,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                     pageBuilder: (context, state) => AppMotion.createPage(
                       key: state.pageKey,
                       child: const NotificationsView(),
-                      type: AppTransitionType.slideFade,
-                    ),
-                  ),
-                  GoRoute(
-                    path: 'audio',
-                    pageBuilder: (context, state) => AppMotion.createPage(
-                      key: state.pageKey,
-                      child: const AudioView(),
                       type: AppTransitionType.slideFade,
                     ),
                   ),

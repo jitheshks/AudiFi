@@ -17,7 +17,6 @@ import 'package:audifi/features/playback/presentation/widgets/mini_player/mini_p
 import 'package:audifi/features/settings/presentation/views/about_view.dart';
 import 'package:audifi/features/settings/presentation/views/accent_color_view.dart';
 import 'package:audifi/features/settings/presentation/views/appearance_view.dart';
-import 'package:audifi/features/settings/presentation/views/audio_view.dart';
 import 'package:audifi/features/settings/presentation/views/music_view.dart';
 import 'package:audifi/features/settings/presentation/views/notifications_view.dart';
 import 'package:audifi/features/settings/presentation/views/playback_view.dart';
@@ -222,14 +221,6 @@ void main() {
                   ),
                 ),
                 GoRoute(
-                  path: 'audio',
-                  pageBuilder: (context, state) => AppMotion.createPage(
-                    key: state.pageKey,
-                    child: const AudioView(),
-                    type: AppTransitionType.slideFade,
-                  ),
-                ),
-                GoRoute(
                   path: 'music',
                   pageBuilder: (context, state) => AppMotion.createPage(
                     key: state.pageKey,
@@ -293,14 +284,7 @@ void main() {
         await tester.tap(find.text('‹ Settings'));
         await tester.pumpAndSettle();
 
-        // 3. Audio
-        await tester.tap(find.text('Audio'));
-        await tester.pumpAndSettle();
-        expect(find.byType(AudioView), findsOneWidget);
-        await tester.tap(find.text('‹ Settings'));
-        await tester.pumpAndSettle();
-
-        // 4. Music
+        // 3. Music
         await tester.tap(find.text('Music'));
         await tester.pumpAndSettle();
         expect(find.byType(MusicView), findsOneWidget);
@@ -442,7 +426,6 @@ void main() {
         final views = <Widget>[
           const PlaybackView(),
           const NotificationsView(),
-          const AudioView(),
           const MusicView(),
           const AppearanceView(),
           const PrivacyView(),

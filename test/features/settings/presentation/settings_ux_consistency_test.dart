@@ -5,7 +5,6 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:audifi/core/permissions/permission_providers.dart';
 import 'package:audifi/features/settings/presentation/views/about_view.dart';
-import 'package:audifi/features/settings/presentation/views/audio_view.dart';
 import 'package:audifi/features/settings/presentation/views/music_view.dart';
 import 'package:audifi/features/settings/presentation/views/playback_view.dart';
 import 'package:audifi/features/settings/presentation/views/privacy_view.dart';
@@ -35,7 +34,7 @@ void main() {
       );
     }
 
-    testWidgets('SettingsView displays all 7 categories in exact order', (
+    testWidgets('SettingsView displays all 6 categories in exact order', (
       tester,
     ) async {
       await tester.pumpWidget(createTestHarness(const SettingsView()));
@@ -47,20 +46,20 @@ void main() {
       // Verify category headers
       expect(find.text('PLAYBACK'), findsOneWidget);
       expect(find.text('NOTIFICATIONS'), findsOneWidget);
-      expect(find.text('AUDIO'), findsOneWidget);
       expect(find.text('MUSIC'), findsOneWidget);
       expect(find.text('APPEARANCE'), findsOneWidget);
       expect(find.text('PRIVACY'), findsOneWidget);
       expect(find.text('ABOUT'), findsOneWidget);
+      expect(find.text('AUDIO'), findsNothing);
 
       // Verify category titles
       expect(find.text('Playback'), findsOneWidget);
       expect(find.text('Notifications'), findsOneWidget);
-      expect(find.text('Audio'), findsOneWidget);
       expect(find.text('Music'), findsOneWidget);
       expect(find.text('Appearance'), findsOneWidget);
       expect(find.text('Privacy Policy'), findsOneWidget);
       expect(find.text('About'), findsOneWidget);
+      expect(find.text('Audio'), findsNothing);
     });
 
     testWidgets(
@@ -79,29 +78,6 @@ void main() {
 
         // Verify switches exist
         expect(find.byType(AudifiSwitch), findsNWidgets(2));
-      },
-    );
-
-    testWidgets(
-      'AudioView renders streaming quality and removes Volume Normalization',
-      (tester) async {
-        await tester.pumpWidget(createTestHarness(const AudioView()));
-        await tester.pumpAndSettle();
-
-        expect(find.text('‹ Settings'), findsOneWidget);
-        expect(find.text('Audio'), findsOneWidget);
-        expect(find.text('AUDIO INFORMATION'), findsOneWidget);
-        expect(find.text('Audio information'), findsOneWidget);
-        expect(find.text('STREAMING QUALITY'), findsOneWidget);
-        expect(find.text('Streaming Quality'), findsOneWidget);
-        expect(find.text('High Definition (320 kbps MP3)'), findsOneWidget);
-
-        // Verify unsupported volume normalization is removed
-        expect(find.text('Volume Normalization'), findsNothing);
-        expect(
-          find.text('Not supported by progressive audio streams'),
-          findsNothing,
-        );
       },
     );
 

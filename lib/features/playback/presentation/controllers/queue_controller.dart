@@ -231,7 +231,6 @@ class QueueController extends Notifier<PlaybackQueue> {
     if (oldIndex < 0 || oldIndex >= state.items.length) return;
     if (newIndex < 0 || newIndex > state.items.length) return;
 
-    final currentTrack = state.currentTrack;
     final newItems = List<Track>.from(state.items);
 
     var targetIndex = newIndex;
@@ -242,10 +241,16 @@ class QueueController extends Notifier<PlaybackQueue> {
     final movedItem = newItems.removeAt(oldIndex);
     newItems.insert(targetIndex, movedItem);
 
-    // Maintain current playing track reference
-    final newCurrent = currentTrack != null
-        ? newItems.indexWhere((t) => t.id == currentTrack.id)
-        : 0;
+    // Maintain current playing track reference accurately by index arithmetic,
+    // which remains 100% stable even if the queue contains duplicate tracks.
+    int newCurrent = state.currentIndex;
+    if (oldIndex == state.currentIndex) {
+      newCurrent = targetIndex;
+    } else if (oldIndex < state.currentIndex && targetIndex >= state.currentIndex) {
+      newCurrent = state.currentIndex - 1;
+    } else if (oldIndex > state.currentIndex && targetIndex <= state.currentIndex) {
+      newCurrent = state.currentIndex + 1;
+    }
 
     final shuffled = _generateShuffledIndices(
       newItems.length,

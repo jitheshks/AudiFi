@@ -105,74 +105,18 @@ class HomeView extends ConsumerWidget {
                 ),
               ),
 
-              // Hero Action & Quick Access Shortcuts Row
+              // Quick Collection Shortcuts: Liked Songs, Downloads, Local Files
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Smart Primary Action Button
-                    if (history.isNotEmpty)
-                      AudifiButton(
-                        text: 'Resume listening',
-                        icon: const Icon(Icons.play_arrow_rounded),
-                        variant: AudifiButtonVariant.primary,
-                        onPressed: () {
-                          final currentPlaying = ref
-                              .read(playbackControllerProvider)
-                              .currentTrack;
-                          final targetTrack = currentPlaying ?? history.first;
-                          ref
-                              .read(playbackControllerProvider.notifier)
-                              .playTrack(targetTrack, contextTracks: history);
-                        },
-                      )
-                    else if (library.likedTracks.isNotEmpty)
-                      AudifiButton(
-                        text: 'Play Liked Songs',
-                        icon: const Icon(Icons.favorite_rounded),
-                        variant: AudifiButtonVariant.primary,
-                        onPressed: () {
-                          ref
-                              .read(playbackControllerProvider.notifier)
-                              .playTrack(
-                                library.likedTracks.first,
-                                contextTracks: library.likedTracks,
-                              );
-                        },
-                      )
-                    else if (localTracks.isNotEmpty)
-                      AudifiButton(
-                        text: 'Play Local Files',
-                        icon: const Icon(Icons.folder_rounded),
-                        variant: AudifiButtonVariant.primary,
-                        onPressed: () {
-                          ref
-                              .read(playbackControllerProvider.notifier)
-                              .playTrack(
-                                localTracks.first,
-                                contextTracks: localTracks,
-                              );
-                        },
-                      )
-                    else
-                      AudifiButton(
-                        text: 'Explore Discover',
-                        icon: const Icon(Icons.explore_rounded),
-                        variant: AudifiButtonVariant.primary,
-                        onPressed: () => context.go(RoutePaths.discover),
-                      ),
-
-                    AppSpacing.vGap12,
-
-                    // Quick Collection Shortcuts: Liked Songs, Downloads, Local Files
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: isWide ? 420.0 : double.infinity,
-                      ),
-                      child: Row(
-                        children: [
-                          // Liked Songs Shortcut
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isWide ? 420.0 : double.infinity,
+                    ),
+                    child: Row(
+                    children: [
+                      // Liked Songs Shortcut
                           Expanded(
                             child: InkWell(
                               onTap: () =>
@@ -356,9 +300,8 @@ class HomeView extends ConsumerWidget {
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
 
               // Fresh User Welcome State
               if (isCompletelyFreshUser) ...[
